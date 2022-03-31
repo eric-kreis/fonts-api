@@ -1,25 +1,39 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
-import { IApiFonts } from '../interfaces/font';
-dotenv.config();
-
-const { API_KEY } = process.env;
-const API_URL =  'https://www.googleapis.com/webfonts/v1/webfonts?key=';
+import fs from 'fs';
+import { StatusCodes } from 'http-status-codes';
+import { IApiFonts, IFontFamily } from '../interfaces/font';
+import HttpError from '../utils/http-error';
 
 class FontService {
-  private apiUrl: string;
+  private baseURL: string;
 
   constructor() {
-    this.apiUrl = `${API_URL}${API_KEY}`;
+    const { API_KEY } = process.env;
+    const API_URL = 'https://www.googleapis.com/webfonts/v1/webfonts?key=';
+    this.baseURL = `${API_URL}${API_KEY}`;
   }
 
-  async getAllFonts(family: string) {
-    const { data } = await axios.get<IApiFonts>(this.apiUrl)
+  async findByFamily(family: string) {
+    const { data } = await axios.get<IApiFonts>(this.baseURL);
     const fonts = data.items;
-    const fontFamily = fonts.find((font) => font.family.toLowerCase() === family.toLowerCase());
-    if (!fontFamily) throw { status: 404, message: 'fonte não encontrada' };
-    Promise.all(Object.values(fontFamily.files).map(async (file) => axios.get(file)))
-    return fontFamily
+    const fontFamily = fonts.find((font) => (
+      font.family.toLowerCase().includes(family.toLowerCase())
+    ));
+    if (!fontFamily) throw new HttpError(`family ${family} not found`, StatusCodes.NOT_FOUND);
+    return fontFamily;
+  }
+
+  async writeByFamily(fontFamily: IFontFamily) {
+    const familyDir = `${process.cwd()}/fonts/${fontFamily.family.toLowerCase()}`;
+    if (fs.existsSync(familyDir)) {
+      throw new HttpError(`family ${fontFamily.family} already exists`, StatusCodes.CONFLICT);
+    }
+    const subFonts = Object.entries(fontFamily.files);
+    fs.mkdirSync(familyDir, { recursive: true });
+    subFonts.forEach(async ([subFont, fileURL]) => {
+      const subfontResponse = await axios.get(fileURL, { responseType: 'arraybuffer' });
+      fs.writeFileSync(`${familyDir}/${subFont}.ttf`, subfontResponse.data);
+    });
   }
 }
 

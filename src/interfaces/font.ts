@@ -1,4 +1,4 @@
-export interface IFamily {
+export interface IFontFamily {
   family: string;
   variants: string[];
   subsets: string[];
@@ -11,5 +11,5 @@ export interface IFamily {
 
 export interface IApiFonts {
   kind: string;
-  items: IFamily[]
+  items: IFontFamily[]
 }
