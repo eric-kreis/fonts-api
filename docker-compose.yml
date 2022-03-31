@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  dev:
+    container_name: font_api_dev
+    image: font-api-dev:1.0.0
+    build:
+      context: .
+      target: development
+      dockerfile: ./Dockerfile
+    command: yarn dev
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: always

@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "rm -rf ./dist && tsc -p .",
+    "prebuild": "rimraf dist",
+    "build": "tsc -p .",
     "start": "node dist/api/server.js",
     "dev": "ts-node-dev --transpile-only --respawn --ignore-watch node_modules src/api/server.ts",
     "lint": "eslint . --ext .js,.ts"
