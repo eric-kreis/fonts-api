@@ -5,11 +5,12 @@ import { IApiFonts, IFontFamily } from '../interfaces/font';
 import kebabCaseSerializer from '../serializers/kebab-case.serializer';
 import HttpError from '../utils/http-error';
 
+const { API_KEY } = process.env;
+
 class FontService {
   private baseURL: string;
 
   constructor() {
-    const { API_KEY } = process.env;
     const API_URL = 'https://www.googleapis.com/webfonts/v1/webfonts?key=';
     this.baseURL = `${API_URL}${API_KEY}`;
   }
@@ -33,13 +34,13 @@ class FontService {
         StatusCodes.CONFLICT,
       );
     }
+    fs.mkdirSync(familyDir, { recursive: true });
     const subFonts = await Promise.all(
       Object.entries(fontFamily.files).map(async ([subFont, fileURL]) => {
         const subfontResponse = await axios.get(fileURL, { responseType: 'arraybuffer' });
         return [subFont, subfontResponse.data];
       }),
     );
-    fs.mkdirSync(familyDir, { recursive: true });
     subFonts.forEach(([subFont, fileContent]) => {
       const fileName = `${kebabCaseSerializer(subFont)}.ttf`;
       fs.writeFileSync(`${familyDir}/${fileName}`, fileContent);

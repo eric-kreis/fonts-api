@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import FontService from '../services/font.service';
-import Controller from '../utils/controller.decorator';
-import { Get } from '../utils/handlers.decorator';
-import HttpError from '../utils/http-error';
+import FontService from '../../services/font.service';
+import Controller from '../../utils/controller.decorator';
+import { Get } from '../../utils/handlers.decorator';
+import HttpError from '../../utils/http-error';
 
 @Controller('/fonts')
 class FontController {
-  constructor(private readonly service: FontService) {}
+  constructor(public readonly service: FontService) {}
 
   @Get()
   async downloadFamily(req: Request, res: Response) {

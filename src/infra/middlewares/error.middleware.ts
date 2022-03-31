@@ -1,6 +1,6 @@
 import { ErrorRequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import HttpError from '../utils/http-error';
+import HttpError from '../../utils/http-error';
 
 const errorMiddleware: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof HttpError) {

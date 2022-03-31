@@ -1,33 +1,17 @@
-import dotenv from 'dotenv';
-import express, { Handler, Router } from 'express';
+import express from 'express';
 import 'reflect-metadata';
 import 'express-async-errors';
-import FontController from '../controllers/font.controller';
-import errorMiddleware from '../middlewares/error.middleware';
-import FontService from '../services/font.service';
+import errorMiddleware from '../infra/middlewares/error.middleware';
 import { MetadataKeys } from '../utils/metadata.keys';
-import { IRouter } from '../utils/handlers.decorator';
-
-dotenv.config();
+import { FontModule } from '../infra/modules/font.module';
 
 const app = express();
 app.use(express.json());
 
-[{ Controller: FontController, Service: FontService }].forEach(({ Controller, Service }) => {
-  const info: Array<{ api: string, handler: string }> = [];
-  const service = new Service();
-  const controller: { [handlerName: string]: Handler } = new Controller(service) as any;
-  const basePath: string = Reflect.getMetadata(MetadataKeys.BASE_PATH, Controller);
-  const routers: IRouter[] = Reflect.getMetadata(MetadataKeys.ROUTERS, Controller);
-  const controllerRouter = Router();
-  routers.forEach(({ method, path, handlerName }) => {
-    controllerRouter[method](path, controller[String(handlerName)].bind(controller));
-    info.push({
-      api: `${method.toLocaleUpperCase()} ${basePath + path}`,
-      handler: `${Controller.name}.${String(handlerName)}`,
-    });
-  });
-  app.use(basePath, controllerRouter);
+[FontModule].forEach((Module) => {
+  const basePath: string = Reflect.getMetadata(MetadataKeys.BASE_PATH, Module);
+  const router = Reflect.getMetadata(MetadataKeys.ROUTER, Module);
+  app.use(basePath, router);
 });
 
 app.use(errorMiddleware);
