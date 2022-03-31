@@ -15,6 +15,20 @@ class FontService {
     this.baseURL = `${API_URL}${API_KEY}`;
   }
 
+  private getFamilyDir(family: string) {
+    const familyName = kebabCaseSerializer(family);
+    const familyDir = `${process.cwd()}/fonts/${familyName}`;
+    return familyDir;
+  }
+
+  familyExists(family: string) {
+    const familyDir = this.getFamilyDir(family);
+    if (fs.existsSync(familyDir)) {
+      return true;
+    }
+    return false;
+  }
+
   async findByFamily(family: string) {
     const { data } = await axios.get<IApiFonts>(this.baseURL);
     const fonts = data.items;
@@ -26,9 +40,8 @@ class FontService {
   }
 
   async writeByFamily(fontFamily: IFontFamily) {
-    const familyName = kebabCaseSerializer(fontFamily.family);
-    const familyDir = `${process.cwd()}/fonts/${familyName}`;
-    if (fs.existsSync(familyDir)) {
+    const familyDir = this.getFamilyDir(fontFamily.family);
+    if (this.familyExists(fontFamily.family)) {
       throw new HttpError(
         `Family "${fontFamily.family}" already downloaded`,
         StatusCodes.CONFLICT,

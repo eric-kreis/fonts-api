@@ -17,6 +17,15 @@ class FontController {
     const familyInfo = await this.service.writeByFamily(fontFamily);
     res.status(StatusCodes.CREATED).json(familyInfo);
   }
+
+  @Get('/verify')
+  async verifyFamily(req: Request, res: Response) {
+    const { family } = req.query;
+    if (!family) throw new HttpError('Missing family name', StatusCodes.NOT_FOUND);
+    const exists = this.service.familyExists(family as string);
+    if (!exists) throw new HttpError('Family not downloaded', StatusCodes.NOT_FOUND);
+    res.status(StatusCodes.NO_CONTENT).end();
+  }
 }
 
 export default FontController;
