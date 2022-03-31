@@ -10,10 +10,10 @@ class FontController {
 
   async findAll(req: Request, res: Response) {
     const { family } = req.query;
-    if (!family) throw new HttpError('missing family', StatusCodes.NOT_FOUND);
+    if (!family) throw new HttpError('Missing family name', StatusCodes.NOT_FOUND);
     const fontFamily = await this.service.findByFamily(family as string);
-    await this.service.writeByFamily(fontFamily);
-    res.status(StatusCodes.NO_CONTENT).end();
+    const familyInfo = await this.service.writeByFamily(fontFamily);
+    res.status(StatusCodes.CREATED).json(familyInfo);
   }
 }
 
