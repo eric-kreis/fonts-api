@@ -11,11 +11,11 @@ services:
     command: yarn dev
     env_file:
       - .env
-    environment:
-      - PORT=3000
     ports:
-      - 3000:3000
+      - $PORT:$PORT
     volumes:
       - .:/app
       - /app/node_modules
     restart: always
+    # depends_on:
+    #   - database
